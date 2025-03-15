@@ -1,0 +1,74 @@
+import nltk
+import random
+import string
+from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer
+
+# Download required NLTK data
+nltk.download('punkt')
+ntk.download('wordnet')
+nltk.download('omw-1.4')
+
+# Basic chatbot class
+class SimpleChatbot:
+    def __init__(self):
+        self.lemmatizer = WordNetLemmatizer()
+        self.intents = {
+            "greeting": {
+                "patterns": ["hello", "hi", "hey", "good day", "greetings"],
+                "responses": ["Hello!", "Hi there!", "Greetings!", "How can I help you?"]
+            },
+            "goodbye": {
+                "patterns": ["bye", "goodbye", "see you", "later"],
+                "responses": ["Goodbye!", "See you later!", "Have a nice day!"]
+            },
+            "thanks": {
+                "patterns": ["thanks", "thank you", "appreciate it"],
+                "responses": ["You're welcome!", "My pleasure!", "Anytime!"]
+            },
+            "weather": {
+                "patterns": ["weather", "rain", "sun", "temperature"],
+                "responses": ["I wish I could check the weather!", "You should check a weather app!", 
+                             "I'm just a chatbot, I don't know the weather!"]
+            },
+            "default": {
+                "responses": ["Could you rephrase that?", "I'm still learning!", "Interesting, tell me more."]
+            }
+        }
+
+    def preprocess_text(self, text):
+        # Remove punctuation and lowercase
+        text = text.translate(str.maketrans('', '', string.punctuation)).lower()
+        # Tokenize and lemmatize
+        tokens = nltk.word_tokenize(text)
+        return [self.lemmatizer.lemmatize(token) for token in tokens]
+
+    def get_response(self, user_input):
+        processed_input = self.preprocess_text(user_input)
+        
+        # Check for matching intents
+        for intent, data in self.intents.items():
+            if "patterns" in data:
+                for pattern in data["patterns"]:
+                    if any(word in processed_input for word in self.preprocess_text(pattern)):
+                        return random.choice(data["responses"])
+        
+        # Fallback to default response
+        return random.choice(self.intents["default"]["responses"])
+
+# Chat interface
+def chat():
+    print("Chatbot: Hi! I'm a simple chatbot. Type 'quit' to exit.")
+    chatbot = SimpleChatbot()
+    
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() in ['quit', 'exit', 'bye']:
+            print("Chatbot: Goodbye!")
+            break
+        
+        response = chatbot.get_response(user_input)
+        print(f"Chatbot: {response}")
+
+if __name__ == "__main__":
+    chat()
